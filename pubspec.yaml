@@ -1,8 +1,8 @@
 name: jsonify
-description: A starting point for Dart libraries or applications.
-version: 0.0.1
-#homepage: https://www.example.com
-#author: nane <email@example.com>
+description: A Dart library to access the webstorage API like an (almost) full JSON client-side storage
+version: 0.1.0
+homepage: https://github.com/nkratzke/jsonify
+author: Nane Kratzke <nane.kratzke@fh-luebeck.de>
 
 environment:
   sdk: '>=1.20.1 <2.0.0'

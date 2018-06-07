@@ -1,6 +1,6 @@
 # jsonify
 
-A library for Dart developers to lift up the [webstorage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API) to an (almost) full JSON client-side storage.
+A [Dart](https://www.dartlang.org) library to access the [webstorage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API) like an (almost) full JSON client-side storage.
 
 - `window.localstorage` and
 - `window.sessionstorage`
