@@ -1,10 +1,9 @@
-import 'package:jsonify/jsonify.dart';
 import 'package:test/test.dart';
+
+import 'package:jsonify/jsonify.dart';
 import 'dart:convert';
 
 void main() {
-  group('Tests to check jsonify ...', () {
-
     Map<String, Object> testdata = {
       'a': "much more",
       'complicated': 'example',
@@ -12,8 +11,11 @@ void main() {
       'correct?': true
     };
 
+    Map<String, String> storage = new Map<String, String>();
+
     test('List handling', () {
-      JSONMap jstorage = jsonify(new Map<String, String>());
+      storage.clear();
+      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
       jstorage['answer'] = [42, 56, 46, 76];
       jstorage['empty'] = [];
 
@@ -23,8 +25,11 @@ void main() {
     });
 
     test('Nested map handling', () {
-      JSONMap jstorage = jsonify(new Map<String, String>());
+      storage.clear();
+      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
       jstorage['nested'] = testdata;
+
+      print(storage);
 
       expect(jstorage.keys.length, 1);
       expect(jstorage['notExisting'], null);
@@ -38,7 +43,8 @@ void main() {
     });
 
     test('Remove handling', () {
-      JSONMap jstorage = jsonify(new Map<String, String>());
+      storage.clear();
+      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
       jstorage['nested'] = testdata;
 
       expect(jstorage.nested.length, 4);
@@ -50,7 +56,8 @@ void main() {
     });
 
     test('Clear handling', () {
-      JSONMap jstorage = jsonify(new Map<String, String>());
+      storage.clear();
+      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
       jstorage['nested'] = testdata;
 
       expect(jstorage.nested.isNotEmpty, true);
@@ -63,8 +70,10 @@ void main() {
       expect(jstorage.isNotEmpty, false);
     });
 
+    /*
     test('Put if absent', () {
-      JSONMap jstorage = jsonify(new Map<String, String>());
+      storage.clear();
+      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
       jstorage['nested'] = testdata;
 
       jstorage.putIfAbsent('missing', () => 42);
@@ -72,9 +81,11 @@ void main() {
       jstorage.putIfAbsent('missing', () => 84);
       expect(jstorage.missing, 42);
     });
+    */
 
     test('Setter and getter testing', () {
-      JSONMap jstorage = jsonify(new Map<String, String>());
+      storage.clear();
+      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
 
       jstorage['insert'] = { 'example': [42, 56, 86], 'such a': 'small' };
       expect(jstorage.insert.example.last, 86);
@@ -82,15 +93,15 @@ void main() {
       expect(jstorage.insert['such a'], 'small');
 
       jstorage.insert = { 'such a': 'big', 'example': [{'a': 'b'}, 42, {'c': 'd'}] };
-      expect(jstorage.insert.example is List, true);
-      expect(jstorage.insert.example.first is JSONMap, true);
-      expect(jstorage.insert['example'].first is JSONMap, true);
+      expect(jstorage.insert.example is JList, true);
+      expect(jstorage.insert.example.first is JMap, true);
+      expect(jstorage.insert['example'].first is JMap, true);
       expect(jstorage.insert.example.last.c, 'd');
     });
 
     test('Backend testing', () {
       Map<String, String> backend = new Map<String, String>();
-      JSONMap jstorage = jsonify(backend);
+      JSONStorage jstorage = new JSONStorage.fromStorage(backend);
       jstorage.answer = 42;
       jstorage.list = [];
       jstorage.nested = { 'a': 'b', 'c': 3, 'd': ['a', 'b', 'c', 'd']};
@@ -103,5 +114,4 @@ void main() {
       expect(jstorage.nested.d.last, 'd');
       expect(backend.length, 3);
     });
-  });
 }

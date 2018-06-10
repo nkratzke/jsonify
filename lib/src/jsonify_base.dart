@@ -1,76 +1,138 @@
 import 'dart:convert';
 
-JSONMap jsonify(Map<String, String> storage) => new JSONMap(storage);
+class JMap {
+  JSONStorage _root;
+  Map<dynamic, dynamic> _map;
 
-class JSONMap implements Map<String, Object> {
+  JMap(this._map, this._root);
 
-  Map<String, String> _storage;
-  Map<String, Object> _json;
-
-  JSONMap(this._storage) {
-    _json = new Map<String, Object>();
-    _storage.forEach((key, value) {
-      try { _json[key] = JSON.decode(_storage[key].toString()); }
-      catch (ex) { _json[key] = _storage[key]; }
-    });
-  }
-
-  Iterable<String> get keys => _json.keys;
-  Iterable<Object> get values => _json.values;
-  int get hashCode => _json.hashCode;
-  bool get isEmpty => keys.isEmpty;
+  bool get isEmpty => _map.isEmpty;
   bool get isNotEmpty => !isEmpty;
-  int get length => keys.length;
+  int get length => _map.length;
 
-  Object operator [](Object k) {
-    if (!_json.containsKey(k)) return null;
-    Object v = _json[k];
-    if (v is Map) return jsonify(v);
-    if (v is List) { return v.map((i) => i is Map ? jsonify(i) : i).toList(); }
-    return v;
+  JList get values => new JList(_map.values, _root);
+
+  dynamic operator[](dynamic key) => _wrap(_map[key], _root);
+
+  void operator[]=(dynamic key, dynamic value) {
+    _map[key] = value;
+    _root.write();
   }
 
-  void operator []=(String k, Object v) {
-    _json[k] = v;
-    _json.forEach((k, v) => _storage[k] = JSON.encode(_json[k]));
+  void addAll(Map<dynamic, dynamic> other) {
+    _map.addAll(other);
+    _root.write();
   }
 
-  bool operator ==(other) => other.asMap() == this.asMap();
+  void clear() { _map.clear(); _root.write(); }
 
-  void addAll(Map<String, Object> other) => other.forEach((k, v) => this[k] = v);
+  dynamic remove(dynamic key) {
+    dynamic before = _map.remove(key);
+    _root.write();
+    return before;
+  }
+
+  dynamic noSuchMethod(Invocation i) {
+    if (i.isGetter) return this[_getter(i.memberName)];
+    if (i.isSetter) {
+      this[_setter(i.memberName)] = i.positionalArguments.single;
+      _root.write();
+    }
+  }
+}
+
+dynamic _wrap(dynamic element, JSONStorage root) {
+  if (element is Map) return new JMap(element, root);
+  if (element is List) return new JList(element, root);
+  return element;
+}
+
+String _getter(Symbol s) => s.toString().split('"')[1];
+
+String _setter(Symbol s) => s.toString().split('"')[1].replaceAll("=", "");
+
+class JList extends Iterable {
+  JSONStorage _root;
+  List<dynamic> _list;
+
+  JList(this._list, this._root);
+
+  int get length => _list.length;
+  JList get reversed => new JList(_list.reversed.toList(), _root);
+  Iterator<dynamic> get iterator => _list.iterator;
+  dynamic get first => this[0];
+  dynamic get last => this[length - 1];
+
+  dynamic operator[](int i) =>_wrap(_list[i], _root);
+
+  void operator[]=(int i, dynamic value) {
+    _list[i] = value;
+    _root.write();
+  }
+
+  void add(dynamic value) {
+    _list.add(value);
+    _root.write();
+  }
+
+  void addAll(Iterable<dynamic> values) {
+    _list.addAll(values);
+    _root.write();
+  }
+
+  bool remove(dynamic value) {
+    bool removed = _list.remove(value);
+    if (removed) _root.write();
+    return removed;
+  }
+
+  bool removeAt(int i) {
+    dynamic element = _wrap(_list.removeAt(i), _root);
+    if (element != null) _root.write();
+    return element;
+  }
+
+}
+
+class JSONStorage {
+
+  Map<String, dynamic> _map;
+  Map<String, String> _storage;
+
+  JSONStorage.fromStorage(this._storage) {
+    _map = new Map<String, dynamic>();
+    _storage.forEach((k, v) => _map[k] = JSON.decode(v));
+  }
+
+  bool get isEmpty => _map.isEmpty;
+  bool get isNotEmpty => !isEmpty;
+  Iterable<String> get keys => _map.keys;
+  int get length => _map.length;
+  Iterable<dynamic> get values => _map.values;
+
+  operator[](String key) => _wrap(_map[key], this);
+  operator[]=(String key, dynamic value) {
+    _map[key] = value;
+    _storage[key] = JSON.encode(value);
+  }
+
+  void write() => _map.forEach((k, v) => _storage[k] = JSON.encode(v));
 
   void clear() {
-    _json.clear();
+    _map.clear();
     _storage.clear();
   }
 
-  void forEach(void f(String k, Object v)) => _json.forEach(f);
-
-  Object putIfAbsent(String k, Object ifAbsent()) {
-    Object current = this[k];
-    if (current == null) this[k] = ifAbsent();
-    return current;
+  dynamic remove(String key) {
+    _storage.remove(key);
+    return _wrap(_map.remove(key), this);
   }
 
-  Object remove(Object k) {
-    _storage.remove(k);
-    return _json.remove(k);
-  }
-
-  Map<String, Object> asMap() => _json;
-
-  Map<String, String> backend() => _storage;
-
-  static String _getter(Symbol s) => s.toString().split('"')[1];
-  static String _setter(Symbol s) => s.toString().split('"')[1].replaceAll("=", "");
-
-  Object noSuchMethod(Invocation i) {
+  dynamic noSuchMethod(Invocation i) {
+    if (i.isGetter) return this[_getter(i.memberName)];
     if (i.isSetter) {
-      return this[_setter(i.memberName)] = i.positionalArguments.first;
+      this[_setter(i.memberName)] = i.positionalArguments.single;
+      this.write();
     }
-    return this[_getter(i.memberName)];
   }
-
-  String toString() => _storage.toString();
-
 }
