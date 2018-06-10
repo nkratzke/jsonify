@@ -2,21 +2,21 @@
 
 A [Dart](https://www.dartlang.org) library to access the [webstorage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API) like an (almost) full JSON client-side storage.
 
-- `window.localstorage` and
-- `window.sessionstorage`
+- `window.localStorage` and
+- `window.sessionStorage`
 
 have the restriction to store only Strings as keys and values.
 So, if you have to store an highscore of 456431 points you have to
 convert the integer into a string of "456431" and store it to webstorage.
 
     int highscore = 456431;
-    window.localstorage['highscore'] = highscore.toString();
+    window.localStorage['highscore'] = highscore.toString();
 
 If you want to read this highscore later-on you have to convert it into an integer value again.
 
     int highscore = int.parse(window.localstorage['highscore']);
 
-These into-from-to-string-conversions are cumbersome and error-prone.
+These from-to-into-string-conversions are cumbersome and error-prone.
 It would be more convenient to do something like that:
 
     int score = 456431;
@@ -38,7 +38,7 @@ One option would be to use JSON.
     scores.add(dayscore);
     window.localstorage['scores'] = JSON.encode(scores);
 
-But now we have not even a string but a JSON-from-to-into-conversion.
+But now we have a even more complex JSON-from-to-into-conversion.
 
 
 That is where `jsonify` comes into play. It is merely more than a JSON wrapper
@@ -52,8 +52,8 @@ A simple usage example of `jsonify` may look like that:
     import 'package:jsonify/jsonify.dart';
 
     main() {
-      final jstorage = jsonify(window.localstorage);   // jsonify persistent storage
-      final jsession = jsonify(window.sessionstorage); // jsonify session storage
+      final jstorage = jsonify(window.localStorage);   // jsonify persistent storage
+      final jsession = jsonify(window.sessionStorage); // jsonify session storage
     }
 
 Doing that you can now use local/session-storage
@@ -92,6 +92,44 @@ However, if a key is not a valid Dart identifier (or a reserved Dart keyword), w
     jstorage.is['astonishing?']
 
 That is basically all ... not less, not more. However, it might be helpful.
+
+## Known limitations
+
+Not all methods known for Dart Maps and Lists are currently supported.
+Only, the most essential ones. Currently the following methods and properties are supported:
+
+### Map (currently supported methods and properties)
+
+- isEmpty
+- isNotEmpty
+- length
+- operator[]
+- operator[]=
+- addAll()
+- clear()
+- remove()
+
+### List
+
+- length
+- reversed
+- iterator
+- first
+- last
+- isEmpty
+- isNotEmpty
+- operator[]
+- operator[]=
+- add()
+- addAll()
+- clear()
+- remove()
+- removeAt()
+- sublist
+
+
+
+Please, feel free to post features and bugs.
 
 ## Features and bugs
 

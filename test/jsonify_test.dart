@@ -15,7 +15,7 @@ void main() {
 
     test('List handling', () {
       storage.clear();
-      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
+      JSONStorage jstorage = jsonify(storage);
       jstorage['answer'] = [42, 56, 46, 76];
       jstorage['empty'] = [];
 
@@ -26,7 +26,7 @@ void main() {
 
     test('Nested map handling', () {
       storage.clear();
-      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
+      JSONStorage jstorage = jsonify(storage);
       jstorage['nested'] = testdata;
 
       print(storage);
@@ -44,7 +44,7 @@ void main() {
 
     test('Remove handling', () {
       storage.clear();
-      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
+      JSONStorage jstorage = jsonify(storage);
       jstorage['nested'] = testdata;
 
       expect(jstorage.nested.length, 4);
@@ -57,7 +57,7 @@ void main() {
 
     test('Clear handling', () {
       storage.clear();
-      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
+      JSONStorage jstorage = jsonify(storage);
       jstorage['nested'] = testdata;
 
       expect(jstorage.nested.isNotEmpty, true);
@@ -85,7 +85,7 @@ void main() {
 
     test('Setter and getter testing', () {
       storage.clear();
-      JSONStorage jstorage = new JSONStorage.fromStorage(storage);
+      JSONStorage jstorage = jsonify(storage);
 
       jstorage['insert'] = { 'example': [42, 56, 86], 'such a': 'small' };
       expect(jstorage.insert.example.last, 86);
@@ -101,7 +101,7 @@ void main() {
 
     test('Backend testing', () {
       Map<String, String> backend = new Map<String, String>();
-      JSONStorage jstorage = new JSONStorage.fromStorage(backend);
+      JSONStorage jstorage = jsonify(backend);
       jstorage.answer = 42;
       jstorage.list = [];
       jstorage.nested = { 'a': 'b', 'c': 3, 'd': ['a', 'b', 'c', 'd']};

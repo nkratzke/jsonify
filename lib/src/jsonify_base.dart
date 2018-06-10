@@ -62,6 +62,8 @@ class JList extends Iterable {
   Iterator<dynamic> get iterator => _list.iterator;
   dynamic get first => this[0];
   dynamic get last => this[length - 1];
+  bool get isEmpty => _list.isEmpty;
+  bool get isNotEmpty => !isEmpty;
 
   dynamic operator[](int i) =>_wrap(_list[i], _root);
 
@@ -80,6 +82,11 @@ class JList extends Iterable {
     _root.write();
   }
 
+  void clear() {
+    _list.clear();
+    _root.write();
+  }
+
   bool remove(dynamic value) {
     bool removed = _list.remove(value);
     if (removed) _root.write();
@@ -92,7 +99,13 @@ class JList extends Iterable {
     return element;
   }
 
+  JList sublist(int start, [int end]) {
+    if (end == null) end = _list.length;
+    return new JList(_list.sublist(start, end), _root);
+  }
 }
+
+JSONStorage jsonify(Map<String, String> storage) => new JSONStorage.fromStorage(storage);
 
 class JSONStorage {
 
